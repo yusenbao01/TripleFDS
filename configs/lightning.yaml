@@ -1,0 +1,77 @@
+# ======================================================
+# Top-Level Experiment Configuration
+# ======================================================
+name: "<name_of_experiment>"
+seed: 42
+logdir: "logs"
+# To resume from a specific checkpoint, uncomment and set the path below
+# resume_from_checkpoint: "/path/to/your/checkpoint.ckpt"
+
+# To load weights adaptively from a checkpoint, uncomment and set the path below
+# load_checkpoint_adaptive: "/path/to/your/checkpoint.ckpt"
+
+# Paths to model-specific configuration files
+model_configs:
+  transformer_config: "configs/decouple_synth.yaml"
+  # VAE Configuration
+  # Replace with the actual path to your VAE config file
+  vae_config: "/path/to/your/autoencoder_kl_32x32x4.yaml"
+  # Replace with the actual path to your VAE checkpoint file
+  vae_ckpt_path: "/path/to/your/kl-f8.ckpt"
+
+# ======================================================
+# PyTorch Lightning Trainer & Component Configuration
+# ======================================================
+trainer:
+  accelerator: auto
+  strategy: ddp_find_unused_parameters_true
+  devices: [0,1] # default GPUs to use
+  max_epochs: 1000
+  log_every_n_steps: 50
+  accumulate_grad_batches: 4
+
+# Learning Rate Configuration
+learning_rate:
+  scale_lr: false  # Whether to enable learning rate scaling
+  # If scale_lr is true, the final learning rate will be: base_lr * accumulate_grad_batches * num_gpus * batch_size
+  # If scale_lr is false, the base_learning_rate from the model config will be used directly.
+
+logger:
+  target: lightning.pytorch.loggers.TensorBoardLogger
+  params:
+    name: tensorboard
+    # save_dir is a dynamic parameter that will be injected by the code.
+
+callbacks:
+  setup_callback:
+    target: main.SetupCallback
+    params: {} # All parameters are dynamic and will be injected by the code.
+
+  image_logger:
+    target: main.ImageLogger
+    params:
+      num_train_logs_per_epoch: 10
+      max_images: 16
+      clamp: true
+      num_val_logs_per_epoch: 10 # Log randomly during each validation epoch
+
+  learning_rate_logger:
+    target: lightning.pytorch.callbacks.LearningRateMonitor
+    params:
+      logging_interval: "epoch"
+  
+  cuda_callback:
+    target: main.CUDACallback
+    # This callback has no parameters.
+
+  checkpoint_callback:
+    target: lightning.pytorch.callbacks.ModelCheckpoint
+    params:
+      filename: "{epoch:04}-{step:07}-{val_loss:.4f}"
+      verbose: true
+      save_last: true
+      every_n_epochs: 1
+      save_top_k: 1
+      mode: "min"
+      monitor: "val_loss" # This will be overridden if a monitor is defined in the model.
+      # dirpath is a dynamic parameter that will be injected by the code.

@@ -1,0 +1,51 @@
+model:
+  base_learning_rate: 5e-04
+  target: model.model.TripleFDS
+  params:
+    n_embd: 384
+    feature_dim: 1024
+    alphabet:  data/alphabet/en.txt
+    special_tokens: data/alphabet/special_tokens.txt
+    max_text_len: 16
+    style_len: 240
+    background_len: 256
+    
+    transformer_config:
+      target: model.minGPT.GPT
+      params:
+        vocab_size: 114 # 95 + 1 + 18
+        block_size: 776 # 4x2 + 2x256 + 16 + 240 = 776
+        n_layer: 12
+        n_head: 6
+        n_embd: "${model.params.n_embd}"
+
+data:
+  target: "data.dataset.ContrastiveSCBDataset"
+  params:
+    batch_size: 2
+    num_workers: 8
+    image_height_size: 64
+    hw_ratio: 4
+    
+    # --- Dataset Path Configuration ---
+    # SCB Reconstruction Group
+    # Replace with the actual path to your SCB reconstruction dataset
+    scb_reconstruct_dir: "/path/to/your/scb_reconstruct_dir"
+
+    # SceneVTG Dataset Root (optional)
+    # Replace with the actual path to your SceneVTG dataset
+    # scenevtg_data_dir: "/path/to/your/scenevtg_data_dir"
+
+    # Mostel Dataset Root (optional)
+    # Replace with the actual path to your Mostel dataset
+    # mostel_data_dir: "/path/to/your/mostel_data_dir"
+    # mostel_subsets:
+    #   - "train-50k-1"
+    #   - "train-50k-2"
+    #   - "train-50k-3"
+
+    # --- Dataset Mixing Configuration ---
+    # Sampling ratio (scb_batches / other_batches)
+    # Set to null or omit to calculate ratio automatically based on dataset sizes
+    sampling_ratio: null
+    scb_repeat_count: 8

@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IPython
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Output directories
+output/
+checkpoints/
+
+# Data files
+*.pkl
+*.pth
+*.pt
+*.bin
+
+# Temporary files
+*.tmp
+*.temp
+
+# Large model files
+*.ckpt
+*.safetensors
+
+# Dataset directories (if they contain large files)
+# data/  # 如果数据文件很大，可以取消注释
+
+# Training outputs
+train_outputs/
+results/
